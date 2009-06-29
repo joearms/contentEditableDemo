@@ -12,7 +12,7 @@ CWD := $(shell pwd)
 all: beam blog
 
 blog:
-	(sleep 1 && ../../../js/openurl http://localhost:2068/mini7.html) &		
+	(sleep 1 && ./openurl http://localhost:2068/mini7.html) &		
 	erl -pa ../../bin -s my_simple_server start 2068 `pwd` 
 
 beam: ${MODS:%.erl=%.beam}
