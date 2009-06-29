@@ -1,0 +1,202 @@
+<style>
+  /* set the padding here to match with the size of the top and right
+     sidebars */
+
+ body {
+  padding-top:120px;
+  padding-left:100px;
+  padding-right:320px;
+ }
+
+ div#header {
+  background-color:#aabbcc;
+  position:fixed;
+  padding-left:10px;
+  top:0;
+  left:0;
+  width:500%;
+  height:50px;   /* so padding-left:70px */
+ }
+
+ div#sidebar{
+  background-color:#bbccee;
+  position:fixed;
+  padding-left:20px;
+  padding-right:10px;
+  top:50px;
+  right:0;
+  width:250px;   /* so padding-right in body:270px */
+  height:100%;
+ }
+
+ * html body{
+  overflow:hidden;
+ } 
+
+ * html div.content{
+  height:100%;
+  overflow:auto;
+ }
+
+pre {
+  margin: 1em;
+  font-weight: bold;
+  background-color: #FED;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #48C;
+  padding: 0.5em;
+  font-size: 120%;
+  overflow: auto;
+}
+
+h2 {
+  background: blue;
+  color: white;
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0.7em 0 0.1em 0;
+  padding: .25em 1em .25em 1em;
+  -webkit-border-radius: .7em;
+  -moz-border-radius: 1em;
+}
+
+p {text-align:justify}
+
+</style>
+<script src="jquery-1.3.2.min.js"></script>
+
+<script>
+
+var editing,c;
+
+function toggle_edit()
+{
+    switch(editing){
+    case true:
+	c.get(0).contentEditable = true;
+	c.css({background:"#eeeeee"});
+	$("#header").html("<h2>You can now edit this document - but you can't save the results</h2>");
+	editing=false;
+	break;
+    case false:
+	c.get(0).contentEditable = false;
+	c.css({background:"white"});
+	editing=true;
+	$("#header").html("<h2>This document is locked</h2>");
+        break;
+    }
+}
+
+function add_pre()
+{
+   document.execCommand("insertHTML", false, 
+                        "<pre>I'm pre Edit me</pre>");
+}
+
+
+function add_mod()
+{
+   document.execCommand("insertHTML", false, 
+   "<pre>-module(math).\n-compile(export_all).\n\nfac(0) -> 1;\nfac(N) -> N*fac(N-1).</pre>");
+}
+
+
+$(document).ready(function(){
+     editing=false;
+     c = $("#content");
+     b = $("<button>toggle edit</button>").click(toggle_edit);
+     $("#sidebar").append(b);
+     pre = $("<button>pre</button>").click(add_pre);
+     $("#sidebar").append(pre);
+     mod = $("<button>add module</button>").click(add_mod);
+     $("#sidebar").append(mod);
+     toggle_edit();
+});
+</script>
+
+<body>
+
+<div id="header"></div>
+<div id="sidebar"></div>
+<div id="content">
+<h2>Mini editor (Part 3)</h2>
+
+<p>This is the third in a seven part series on how to make a
+WYSIWYG structure editor using javascript, jquery, erlang and couchDB.
+</p>
+
+<ul>
+  <li><a href="mini1.html">Part1 - toggling content editable</a></li>
+  <li><a href="mini2.html">Part2 - Adding some style</a></li>
+  <li><a href="mini3.html">Part3 - Adding editing buttons</a></li>
+  <li><a href="mini4.html">Part4 - A seamless structure editor</a></li>
+  <li><a href="mini5.html">Part5 - All the buttons</a></li>
+  <li><a href="mini6.html">Part6 - Storing the results forever</a></li>
+  <li><a href="mini7.html">Part7 - Integration with couchdb</a></li>
+</ul>
+
+<h2>Adding Editing Buttons</h2>
+
+<p>There's a problem with the editor. I don't know if you noticed
+it. When you hit carriage return in the middle of a region that you
+are editing a new region is created and this new region inherits the
+properties of the current region.</p>
+
+<p>Just test this by going back to <a href="Part 2">Part 2</a> and try
+editing the page.  You'll find there is no way you can add, for
+example, a new <b>pre</b> region between two paragraphs. Try this,
+then return to this page.
+</p>
+
+<p>To allow for addition of <b>pre</b> field, we'll add a <b>pre</b>
+button to the sidebar. That's easy:</p>
+
+<pre>
+$(document).ready(function(){
+     editing=false;
+     c = $("#content");
+     b = $("&lt;button>toggle edit&lt;/button>").click(toggle_edit);
+     $("#sidebar").append(b);
+     pre = $("&lt;button>pre&lt;/button>").click(add_pre);
+     $("#sidebar").append(pre);
+     toggle_edit();
+});
+</pre>
+
+<p>And <b>add_pre</b></p>
+
+<pre>
+function add_pre()
+{
+   document.execCommand("insertHTML", false, 
+                        "&lt;pre>I'm pre Edit me&lt;/pre>");
+}
+</pre>
+
+<h2>Adding complex structures</h2>
+
+<p>You could also add more complex structures, I've added a button
+that creates an Erlang modle. <i>Alert readers might be thinking that
+doing this might be a way of "bringing eclipse and refactoring to the
+browser" - they would be right!</i>
+</p>
+
+<p>If you've understood the article so far you should have no problems
+following the code. Just do view source and take a peek.</p>
+
+<p>To run the code, click on toggle edit, then click somwhere in the
+document and click on <b>add_module</b></p>
+
+<h2>More things to do</h2>
+
+<p>Now there are a whole bunfle of things you can do with content
+editable mode. Far more than just inserting HTML. For an excellent
+list of things to do look at
+<a href="http://www.quirksmode.org/dom/execCommand/">http://www.quirksmode.org/dom/execCommand/</a>
+
+
+</div>
+</body>

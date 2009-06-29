@@ -1,0 +1,160 @@
+<style>
+  /* set the padding here to match with the size of the top and right
+     sidebars */
+
+ body {
+  padding-top:120px;
+  padding-left:100px;
+  padding-right:320px;
+ }
+
+ div#header {
+  background-color:#aabbcc;
+  position:fixed;
+  padding-left:10px;
+  top:0;
+  left:0;
+  width:500%;
+  height:50px;   /* so padding-left:70px */
+ }
+
+ div#sidebar{
+  background-color:#bbccee;
+  position:fixed;
+  padding-left:20px;
+  padding-right:10px;
+  top:50px;
+  right:0;
+  width:250px;   /* so padding-right in body:270px */
+  height:100%;
+ }
+
+ * html body{
+  overflow:hidden;
+ } 
+
+ * html div.content{
+  height:100%;
+  overflow:auto;
+ }
+
+pre {
+  margin: 1em;
+  font-weight: bold;
+  background-color: #FED;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #48C;
+  padding: 0.5em;
+  font-size: 120%;
+  overflow: auto;
+}
+
+h2, div.header {
+  background: blue;
+  color: white;
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0.7em 0 0.1em 0;
+  padding: .25em 1em .25em 1em;
+  -webkit-border-radius: .7em;
+  -moz-border-radius: 1em;
+}
+
+
+</style>
+<script src="jquery-1.3.2.min.js"></script>
+
+<script>
+
+var editing,c;
+
+function toggle_edit()
+{
+    switch(editing){
+    case true:
+	c.get(0).contentEditable = true;
+	c.css({background:"#eeeeee"});
+	$("#header").html("<h2>You can now edit this document - but you can't save the results</h2>");
+	editing=false;
+	break;
+    case false:
+	c.get(0).contentEditable = false;
+	c.css({background:"white"});
+	editing=true;
+	$("#header").html("<h2>This document is locked</h2>");
+        break;
+    }
+}
+
+$(document).ready(function(){
+     editing=false;
+     c = $("#content");
+     b = $("<button>toggle edit</button>").click(toggle_edit);
+     $("#sidebar").append(b);
+     toggle_edit();
+});
+</script>
+
+<body>
+
+<div id="header"></div>
+<div id="sidebar"></div>
+<div id="content">
+<h2>Mini editor (Part 2)</h2>
+
+<p>This is the second in a seven part series on how to make a
+WYSIWYG structure editor using javascript, jquery, erlang and couchDB.
+</p>
+
+
+<ul>
+  <li><a href="mini1.html">Part1 - toggling content editable</a></li>
+  <li><a href="mini2.html">Part2 - Adding some style</a></li>
+  <li><a href="mini3.html">Part3 - Adding editing buttons</a></li>
+  <li><a href="mini4.html">Part4 - A seamless structure editor</a></li>
+  <li><a href="mini5.html">Part5 - All the buttons</a></li>
+  <li><a href="mini6.html">Part6 - Storing the results forever</a></li>
+  <li><a href="mini7.html">Part7 - Integration with couchdb</a></li>
+</ul>
+
+<h2>Adding some style</h2>
+
+<p>Now I'll style the <b>pre</b> and <b>h2</b> tags. Nothing fancy.</p>
+ 
+<p>Here's how I style <b>pre</b></p>
+
+<pre>
+pre {
+  margin: 1em;
+  font-weight: bold;
+  background-color: #FED;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #48C;
+  padding: 0.5em;
+  font-size: 120%;
+  overflow: auto;
+}
+</pre>
+
+<p>And <b>h2</b> is similar:</p>
+
+<pre>
+h2 {
+  background: blue;
+  color: white;
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0.7em 0 0.1em 0;
+  padding: .25em 1em .25em 1em;
+  -webkit-border-radius: .7em;
+  -moz-border-radius: 1em;
+}
+</pre>
+
+</body>

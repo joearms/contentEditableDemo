@@ -1,0 +1,350 @@
+<style>
+  /* set the padding here to match with the size of the top and right
+     sidebars */
+ body{
+  padding-top:120px;
+  padding-left:100px;
+  padding-right:320px;
+ }
+
+div.buttons {
+    border:1px dotted red;}
+
+p {text-align:justify}
+
+
+ div#header{
+  background-color:#aabbcc;
+  position:fixed;
+  padding-left:10px;
+  top:0;
+  left:0;
+  width:500%;
+  height:50px;   /* so padding-left:70px */
+ }
+ div#right-sidebar{
+  background-color:#bbccee;
+  position:fixed;
+  padding-left:20px;
+  padding-right:10px;
+  top:50px;
+  right:0;
+  width:250px;   /* so padding-right in body:270px */
+  height:100%;
+ }
+
+
+div.research {
+  margin: 1em;
+  display:block;
+  background-color: orange;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #CDE;
+  padding: 0.5em;
+  overflow: auto;
+}
+
+div.french {
+  margin: 1em;
+  display:block;
+  background-color: grey;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #CDE;
+  padding: 0.5em;
+  overflow: auto;
+}
+
+div.swedish {
+  margin: 1em;
+  display:block;
+  background-color: #ffaaee;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #CDE;
+  padding: 0.5em;
+  overflow: auto;
+}
+
+pre {
+  margin: 1em;
+  font-weight: bold;
+  background-color: #FED;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  border-color: #48C;
+  padding: 0.5em;
+  font-size: 120%;
+  overflow: auto;
+}
+
+h2, div.header {
+  background: blue;
+  color: white;
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0.7em 0 0.1em 0;
+  padding: .25em 1em .25em 1em;
+  -webkit-border-radius: .7em;
+  -moz-border-radius: 1em;
+}
+
+
+h3 {
+  background: yellow;
+  color: black;
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0.7em 0 0.1em 0;
+  padding: .25em 1em .25em 1em;
+  -webkit-border-radius: .7em;
+  -moz-border-radius: 1em;
+}
+
+ * html body{
+  overflow:hidden;
+ } 
+
+ * html div.content{
+  height:100%;
+  overflow:auto;
+ }
+
+</style>
+<script src="jquery-1.3.2.min.js"></script>
+
+<script>
+
+var editing;
+var c;
+var guid;
+
+function setup()
+{
+    c=$("#content");
+    var bbar = $("<div class='buttons'>Regular buttons<br></div>");
+    $("#buttons").append(bbar);
+    add_regular_button(bbar, "Clone", function(){clone()});
+    add_regular_button(bbar, "toggle research", 
+		       function(){toggle_class(".research")});
+    add_regular_button(bbar, "toggle edit", 
+		       function(){toggle_edit()});
+    var editButtons = $("<div id='editButtons' class='buttons'>Edit buttons<br></div>");
+    $("#buttons").append(editButtons);
+    add_regular_button(editButtons, "save", function(){save_edit()});
+    add_edit_button(editButtons, "Q",   "insertHTML", "&ldquo;quotes&rdquo;"); 
+    add_edit_button(editButtons, "I",   "italic", null);
+    add_edit_button(editButtons, "S",   "strikethrough", null);
+    add_edit_button(editButtons, "B",   "bold", null);
+    add_edit_button(editButtons, "ol",  "insertHTML", "<ol><li>one</ol>\n");
+    add_edit_button(editButtons, "ul",  "insertHTML", "<ul><li>one</ul>\n");
+    add_edit_button(editButtons, "pre", "insertHTML", "<pre></pre>");
+    add_edit_button(editButtons, "h2",  "insertHTML", "<h2>H2</h2>");
+    add_edit_button(editButtons, "h1",  "insertHTML", "<h1>H</h1>");
+    add_edit_button(editButtons, "p",  "insertHTML", "<p>para</p>");
+    add_edit_button(editButtons, "todo",  "insertHTML", 
+		    "<h3>To Do</h3><ul><li>one</li>");
+
+    add_edit_button(editButtons, "image",  "insertHTML", 
+		    "<center><img onclick='cimage(1);' width='200' src='joe.jpg'/></center>");
+    add_regular_button(editButtons, "add research", 
+		       function(){add_div("research")});
+    entry = $("<input id='#input'></input>");
+    editButtons.append(entry);
+    var versions = $("<div id='versions' class='buttons'>versions<br></div>");
+    $("#buttons").append(versions);
+    load_versions("2009_06_25d");
+    // Not yet ...
+    set_edit_off();
+}
+
+function cimage(x)
+{
+    // alert(x);
+    // alert($(this));
+    // $(this).hide();
+}
+
+
+function save_edit()
+{
+    // send data back to the server
+    val = $("#content").html();
+    $.get("save_content", 
+	  {id:guid, value:val}, function(x){done_save(x)}, 'json'); 
+}
+
+function load_content(g)
+{
+    $.get("load_content", {id:g}, function(x){done_load(x)}, 'json'); 
+}
+
+function done_save(x)
+{
+    done_load(x);
+    $("#versions").html(x.versions);
+    
+}
+
+function done_load(x)
+{
+    $("#header").html("guid=" + x.guid + " last modified=" + x.mod
+		      + " editable=" + x.edit);
+    guid = x.guid;
+    $("#content").html(x.val);
+    switch(x.edit){
+    case true:
+	set_edit_on();
+	break;
+    case false:
+	set_edit_off();
+	break;
+    };
+}
+
+function toggle_edit()
+{
+    switch(editing){
+    case true:
+	set_edit_off();
+	break;
+    case false:
+	set_edit_on();
+	break;
+    };
+}
+
+
+function load_content_old(type, G)
+{
+    // alert("load content type=" + type + " guid=" + G);
+    // $("#header").html("Guid=" + G);
+    $("#content").load("load_content",{id:G});
+    guid=G;
+    switch(type){
+    case "edit":
+	set_edit_on();
+	break;
+    case "lock":
+	set_edit_off();
+	break;
+    default:
+	alert("????????");
+    };}
+
+function load_versions(Guid)
+{
+    // load the toolbar with versions ...
+    $("#versions").load("get_versions", 
+			{"id":Guid});
+    
+}
+
+function toggle_class(x)
+{
+    $(x).toggle();
+}
+
+function set_edit_off()
+{
+    c.get(0).contentEditable = false;
+    c.css({background:"white"});
+    editing=false;
+    $("#header").html("<h2>This document cannot be edited</h2>");
+    $("#editButtons").hide();
+}
+
+function set_edit_on()
+{
+    c.get(0).contentEditable = true;
+    c.css({background:"#eeeeee"});
+    editing=true;
+
+    $("#header").html("<h2>You can now edit this document - but you can only save the results if you have a server running</h2>");
+    $("#editButtons").show();
+}
+
+function add_regular_button(x, text, callback)
+{
+    var button = $("<button>" + text + "</button>").
+	click(callback);
+    x.append(button);
+}  
+
+function add_div(x)
+{
+    var y = "." + x;
+    $(x).show();
+    document.execCommand("insertHTML",
+			 false,
+			 "<div class='" + x +"'>Add " + x + "here</div>");
+}
+
+function add_edit_button(x, text, cmd, val)
+{
+    var button = $("<button>" + text + "</button>").
+	click(function(){
+		document.execCommand(cmd, false, val);
+	    });
+    x.append(button);
+}
+
+$(document).ready(function(){setup()});
+
+</script>
+
+<body>
+
+<div id="header">
+</div>
+
+<div id="right-sidebar">
+  <b>Buttons</b><br>
+  <div id="buttons">
+  </div>
+</div>
+
+<div id="content">
+<h2>Mini editor (Part 6)</h2>
+
+<p>This is part six of a seven part series on how to make a
+WYSIWYG structure editor using javascript, jquery, erlang and couchDB.
+</p>
+
+
+<ul>
+  <li><a href="mini1.html">Part1 - toggling content editable</a></li>
+  <li><a href="mini2.html">Part2 - Adding some style</a></li>
+  <li><a href="mini3.html">Part3 - Adding editing buttons</a></li>
+  <li><a href="mini4.html">Part4 - A seamless structure editor</a></li>
+  <li><a href="mini5.html">Part5 - All the buttons</a></li>
+  <li><a href="mini6.html">Part6 - Storing the results forever</a></li>
+  <li><a href="mini7.html">Part7 - Integration with couchdb</a></li>
+</ul>
+
+<h2>Storing the results forever</h2>
+
+<p>In javascript you cannot store anything locally (apart from
+cookies).  So to store the results of editing we need a backend-server
+that can store the results.</p>
+
+<p>To implement this I have made a simple back-end web server
+in Erlang, a complete tarball can be found at ...</p>
+
+<p>If you are running a live system you should be able to click
+on the links in the sidebar to fetch a bog entry than use the store
+button to save the blog. If you are not serving this from
+an Erlang server then the save operation will fail.</p>
+
+</div>
+
+</body>
